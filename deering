@@ -1,0 +1,1239 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <windows.h>
+
+
+//DEFINICION DE ARCHIVOS
+
+#define Archivo_articulos "Archivo_articulos.dat"
+#define Archivo_usuarios "usuarios.dat"
+#define Archivo_proveedores "proveedores.dat"
+#define Archivo_ventas "ventas.dat"
+
+
+//---DECLARACION DE REGISTROS-----
+struct detalle
+{
+
+    int talle;
+    char color[50];
+    char descripcion[50];
+
+};
+
+
+
+typedef struct
+{
+    int Id_Articulo;
+    char nombre[50];
+    int cantidad;
+    float precio;
+    struct detalle detalles;
+    char fechayhora;
+
+} Articulo;
+
+
+
+struct info
+{
+    char nombre[50];
+    char Direccion[50];
+    int CUIT;
+    int Telefono;
+    char localidad[50];
+
+};
+
+typedef struct
+{
+    int Id_Proveedor;
+    struct info informacion;
+
+} Proveedor;
+
+typedef struct
+{
+    int Id_cliente;
+    struct info informacion;
+
+} Cliente;
+
+typedef struct
+{
+    int Id_Usuario;
+    char user[50];
+    char pass[50];
+
+} Usuarios;
+
+typedef struct
+{
+
+    int id_venta;
+    int id_producto;
+    int cantidad;
+    float monto;
+    float total;
+    float monto_inicial;
+
+} ventas;
+
+typedef struct
+{
+    int id_caja;
+    float apertura_caja;
+    float cierre_caja;
+} caja;
+
+//--------PROTOTIPADO----------
+void dibujarCuadro(int x1,int y1,int x2,int y2);
+char fecha_y_hora();
+Articulo Mostrar_Archivos_de_articulos (Articulo art);
+Usuarios Password_y_Contrasenia(int validos);
+void menu (Articulo Art[30],ventas ven[],Proveedor pro[],Usuarios user[],caja caja_diaria[]);
+Articulo Carga_de_Articulos(Articulo art[],int validos);
+Proveedor Carga_de_Proveedor(int validos);
+void Mostrar_Articulo (Articulo ArticuloA);
+int Cargar_Varios_Articulos (Articulo Art[], int validos,int lim);
+int Carga_muchos_Proveedores(Proveedor pro[],int validos,int lim);
+void Mostrar_todos_los_Proveedores (Proveedor pro[30], int dim);
+void Mostrar_Articulos (Articulo Art[30], int dim);
+float Precio_Final_venta(int cant,Articulo Art[],int posicion);
+void Buscar_Articulo_Por_Id(Articulo Art[],int validos, int num);
+void Insercion ( Articulo Art[],int validos,int numero);
+int  retornar_posicion_Articulo_Por_Nombre(Articulo Art[],int validos, char nombre[],int talle);
+int Ingreso_Al_Sistema(Usuarios user[],int validos);
+int Cargar_Muchos_Usuarios(Usuarios user[],int validos,int lim);
+int Ingresar_Venta(Articulo Art[],ventas ven[],int limite,int validos);
+void Mostrar_Usuario (Usuarios userA);
+void Mostrar_Todos_los_Usuarios (Usuarios userA[], int dim);
+void Mostrar_Registros_Usuarios();
+void Mostrar_un_Usuario (Usuarios Unusuario);
+void Pasar_arreglo_de_usuarios_archivo(Usuarios a[],int validos);
+char fecha_y_hora();
+void Pasar_arreglo_de_ventas_archivo(ventas a[],int validos);
+void PasardelArchivoAlArreglo(Articulo a[],int limite);
+void gotoxy(int x,int y);
+int validador_de_id(Articulo art[],int validos,int num);
+int generador_de_id(Articulo art[],int validos);
+
+
+//FUNCION PRINCIPAL MAIN
+int main()
+{
+
+    Usuarios user[200];
+    Articulo Art[200];
+    Proveedor pro[200];
+    ventas ventas[200];
+    caja caja_diaria[200];
+    system("COLOR E0");
+    Ingreso_Al_Sistema1();
+    abrir_caja(caja_diaria,200);
+
+    menu (Art,pro,ventas,user,caja_diaria);
+
+
+
+    return 0;
+}
+
+
+//------MENU DEL SISTEMA----
+void menu (Articulo Art[30],ventas ven[],Proveedor pro[],Usuarios user[],caja caja_diaria[])
+{
+    int eleccion;
+    int cantidad = 0;
+    int num = 0;
+    char nombre[50];
+    int mat = 0;
+    int cantpro = 0;
+    int flag = 0;
+    int cantidad_usuarios = 0;
+    int cantidad_de_ventas = 0;
+
+
+
+    do
+    {
+
+
+        dibujarCuadro(0,0,78,60); //SE DIBUJA EL CUADRO PRINCIPAL
+        dibujarCuadro(1,1,77,5); //SE DIBUJA EL CUADRO DEL TITULO
+        gotoxy(30,2);
+        printf("OHANA INDUMENTARIA");
+
+        printf("\n\n\n\n");
+        printf("\t\t[1] Cargar Articulos\n");
+        printf("\t\t[2] Ver Lista de Articulos\n");
+        printf("\t\t[3] Buscar Articulo por Id_Articulo\n");
+        printf("\t\t[4] Buscar Articulo por Nombre \n");
+        printf("\t\t[5] Cargar Proveedor \n");
+        printf("\t\t[6] Mostrar Proveedores \n");
+        printf("\t\t[7] Ingresar Venta \n");
+        printf("\t\t[8] Usuarios \n");
+        //printf("10. Mostrar Archivo de Articulos \n");
+        //  printf("11. Pasar usuarios a un archivo \n");
+        // printf("12. Mostrar Archivo de Usuarios \n");
+        // printf("\t\t[9] Cargar Usuarios \n");
+        printf("\t\t[10]Ventas Realizadas\n");
+        printf("\t\t[16]Cierre de caja");
+        // printf("14. Mostrar articulos por orden alfabetico \n");
+        // printf("15. Mostrar archivo ventas \n");
+
+
+
+
+
+        printf("\t\t[0]. Salir\n");
+        printf("\n\n\t\tEleccion: ");
+
+
+        scanf("%d",&eleccion);
+
+        switch(eleccion)
+        {
+        case 1:
+
+            cantidad =Cargar_Varios_Articulos(Art,cantidad,30);
+
+            break;
+        case 2:
+            if(cantidad > 0)
+            {
+                ordenSelec(Art,cantidad);
+                Mostrar_Articulos(Art,cantidad);
+            }
+            else
+            {
+                printf("------Lista Vacia--------\n");
+                printf("\nCargue un articulo por favor\n");
+                printf("\n");
+                printf("------Gracias--------\n");
+            }
+
+            break;
+        case 3:
+
+            if(cantidad > 0)
+            {
+                printf("Ingrese Id_Producto:\n");
+                fflush(stdin);
+                scanf("%d",&num);
+                Buscar_Articulo_Por_Id(Art,cantidad,num);
+
+            }
+            else
+            {
+                printf("------Lista Vacia--------\n");
+                printf("\nCargue un articulo por favor\n");
+                printf("\n");
+                printf("------Gracias--------\n");
+            }
+
+
+            break;
+
+        case 4:
+
+
+            if(cantidad > 0)
+            {
+                printf ("Ingrese nombre del articulo:\n");
+                fflush(stdin);
+                gets(&nombre);
+                Buscar_Articulo_Por_Nombre(Art,cantidad,nombre);
+
+            }
+            else
+            {
+                printf("------Lista Vacia--------\n");
+                printf("\nCargue un articulo por favor\n");
+                printf("\n");
+                printf("------Gracias--------\n");
+            }
+
+
+            break;
+
+        case 5:
+            cantpro = Carga_muchos_Proveedores(pro,cantpro,30);
+            break;
+        case 6 :
+            if(cantpro > 0)
+            {
+                Mostrar_todos_los_Proveedores(pro,cantpro);
+
+            }
+            else
+            {
+                printf("------Lista Vacia--------\n");
+                printf("\nCargue Proveedor\n");
+                printf("\n");
+                printf("------Gracias--------\n");
+            }
+
+            break;
+
+        case 7 :
+
+            if(cantidad > 0)
+            {
+                cantidad_de_ventas = Ingresar_Venta(Art,ven,200,cantidad_de_ventas);
+
+
+            }
+            else
+            {
+                printf("------Lista Vacia--------\n");
+                printf("\nCargue un articulo por favor\n");
+                printf("\n");
+                printf("------Gracias--------\n");
+            }
+
+            break;
+
+        case 8:
+            //  Mostrar_Todos_los_Usuarios(user,cantidad_usuarios);
+            break;
+
+        case 9 :
+            Pasar_arreglo_de_articulos_archivo(Art,cantidad);
+            break;
+
+        case 10 :
+            Mostrar_Todas_las_ventas(ven,cantidad_de_ventas);
+            //Mostrar_Archivos_Articulos(Art);
+            break;
+
+        case 11 :
+            Pasar_arreglo_de_usuarios_archivo(user,cantidad_usuarios);
+            break;
+
+        case 12 :
+            Mostrar_Archivos_Usuarios();
+            break;
+
+        case 13 :
+            // cantidad_usuarios = Cargar_Muchos_Usuarios(user,cantidad_usuarios,50);
+            break;
+
+        case 14 :
+            Ordenar_Articulos_Por_Nombre(Art,cantidad);
+            Mostrar_Articulos(Art,cantidad);
+            break;
+
+        case 15 :
+            Mostrar_Archivo_ventas();
+            break;
+
+        case 16 :
+            cerrar_caja(caja_diaria,ven,cantidad_de_ventas);
+            exit(0);
+            break;
+        }
+
+
+        printf("\n\n");
+        system("pause");
+        system("cls");
+    }
+    while(eleccion != 0);
+
+}
+//FECHA Y HORA
+//obtenemos la fecha y la hora
+char  fecha_y_hora()
+{
+    // Tiempo actual
+    time_t t = time(NULL);
+    struct tm tiempoLocal = *localtime(&t);
+    // El lugar en donde se pondrá la fecha y hora formateadas
+    char fechaHora[70];
+    // le damos formato con strftime(funcion dentro de la libreria time)
+    char *formato = "%Y-%m-%d %H:%M:%S";
+    int bytesEscritos = strftime(fechaHora, sizeof fechaHora, formato, &tiempoLocal);
+    if (bytesEscritos != 0)
+    {
+        // Si no hay error, los bytesEscritos no son 0
+        printf("Fecha y hora: %s", fechaHora);
+    }
+    else
+    {
+        printf("Error formateando fecha");
+    }
+    return fechaHora;
+}
+
+
+
+
+
+//-----CARGA DE USUARIOS----------
+
+//Muestro un usuario
+void Mostrar_Usuario (Usuarios userA)
+{
+    printf("Numero de usuario:%d",userA.Id_Usuario);
+    printf("Usuario:%s",userA.user);
+    printf("Contraseña:%s",userA.pass);
+}
+
+//Cargo un usuario
+Usuarios Carga_usuario ()
+{
+    Usuarios unusuario;
+
+    printf("\t\tUsuario : ");
+    fflush(stdin);
+    gets(unusuario.user);
+    printf("\t\tContraseña : ");
+    fflush(stdin);
+    gets(unusuario.pass);
+
+    return unusuario;
+}
+// cargo un archivo para luego utilizarlo como base de datos.
+
+void Carga_archivo_usuarios ()
+{
+    Usuarios unusuario;
+    FILE * archi;
+    archi=fopen(Archivo_usuarios,"ab");
+    int i=0;
+    char rta = 's';
+
+    if(archi!=NULL)
+    {
+        while(rta=='s')
+        {
+            system("cls");
+            printf("[USUARIO: %d]\n\n", i+1);
+            unusuario = Carga_usuario();
+            i++;
+            fwrite(&unusuario, sizeof(Usuarios), 1, archi);
+            printf("Cargar nuevo Usuario?\n");
+            fflush(stdin);
+            scanf("%c",&rta);
+
+        }
+        fclose(archi);
+    }
+    else
+    {
+        printf("No se pudo abrir el archivo\n");
+    }
+}
+
+//----INGRESO AL SISTEMA-----
+
+//  Cargo con datos un archivo de usuarios para utlizarlo como base de datos.
+int ingreso (char user[],char pass[] )
+{
+    Usuarios unusuario;
+
+    FILE * archi;
+    archi=fopen(Archivo_usuarios,"rb");
+    int flag =-1;
+
+    if(archi!=NULL)
+    {
+        while (fread(&unusuario,sizeof(Usuarios),1,archi)>0)
+        {
+
+            if(strcmp(unusuario.pass,pass)== 0)
+            {
+                if (strcmp(unusuario.user,user)== 0)
+                {
+                    flag = 1;
+                }
+
+            }
+
+        }
+        fclose(archi);
+    }
+    else
+    {
+        printf("No se puede abrir el archivo!\n");
+    }
+
+    return flag;
+}
+//validacion llamando a la funcion anterior (ingreso)
+
+void Ingreso_Al_Sistema1()
+{
+    char user [50];
+    char pass [50];
+
+    int flag = 0;
+    do
+    {
+        printf("------------------------");
+        printf("\t\t\nUsuario:");
+        fflush(stdin);
+        gets(user);
+        printf("------------------------");
+        printf("\t\t\nContraseña:");
+        fflush(stdin);
+        gets(pass);
+
+        flag = ingreso(user,pass);
+
+        if (flag == -1)
+        {
+            printf("Usuario y/o contrasenia invalida\n");
+        }
+        else
+        {
+            system("cls");
+            printf("\n\n\n\n");
+            dibujarCuadro(1,1,77,3); //SE DIBUJA EL CUADRO DEL TITULO
+            gotoxy(30,2);
+            printf("BIENVENIDOS AL SISTEMA");
+
+            printf("\n\n");
+            system("pause");
+            system("cls");
+        }
+    }
+    while (flag !=1);
+
+}
+
+
+//------ARTICULOS-------------
+
+//Cargo un Articulo
+Articulo Carga_de_Articulos(Articulo art[],int validos)
+{
+    Articulo ArticuloA;
+
+    int num = generador_de_id(art,validos);
+    ArticuloA.Id_Articulo = num;
+
+    printf("\n");
+
+    printf("\t[Nuevo articulo][!]\n");
+    printf("\n");
+    printf("\t Nombre:");
+    fflush(stdin);
+    gets(ArticuloA.nombre);
+    printf("\n");
+    printf("\t talle:");
+    fflush(stdin);
+    scanf("%d",&ArticuloA.detalles.talle);
+    printf("\n");
+    printf("\t Color:");
+    fflush(stdin);
+    gets(ArticuloA.detalles.color);
+    printf("\n");
+    printf("\t Marca:");
+    fflush(stdin);
+    gets(ArticuloA.detalles.descripcion);
+    printf("\n");
+    printf("\t Cantidad:");
+    fflush(stdin);
+    scanf("%d",&ArticuloA.cantidad);
+    printf("\n");
+    printf("\t Precio:");
+    fflush(stdin);
+    scanf("%f",&ArticuloA.precio);
+    system("cls");
+
+
+    return ArticuloA;
+}
+//Esta funcion busca un numero en el arreglo. Retorna 1 si lo encuentra o 0 sino lo encuentra.
+int validador_de_id(Articulo art[],int validos,int num)
+{
+    int flag = 0;
+    int stop = 0;
+    int i = 0;
+
+    while (i <= validos && stop == 0)
+    {
+        if(art[i].Id_Articulo == num)
+        {
+            stop = 1;
+        }
+        i++;
+    }
+
+    return stop;//retorna 0 o 1
+}
+//Esta funcion devuelve el numero a insertar que no se encuentre en el arreglo.
+int generador_de_id(Articulo art[],int validos)
+{
+    int num_ale = 0;
+    int stop = 0;
+
+    for(int i= 0 ; i < validos; i++)
+    {
+        //genera numeros aleatorios
+        do
+        {
+            num_ale = rand() % 100;
+            stop = validador_de_id(art,validos,num_ale);
+
+        }
+        while(stop!=0);
+
+    }
+    return num_ale;
+}
+// Cargo varios articulos en el arreglo
+int Cargar_Varios_Articulos (Articulo Art[], int validos,int lim)
+{
+    char rta='s';
+    Articulo temporal;
+
+    while ((validos < lim ) && (rta=='s'))
+    {
+
+        temporal = Carga_de_Articulos(Art,validos);
+        Art[validos] = temporal;
+        validos++;
+        printf("Cargar otro articulo? S|N\n");
+        fflush(stdin);
+        scanf("%c",&rta);
+    }
+    Pasar_arreglo_de_articulos_archivo(Art,validos);
+    return validos;
+
+}
+
+//Muestro un articulo
+void Mostrar_Articulo (Articulo ArticuloA)
+{
+
+
+    printf("\n");
+    printf("\t Numero de articulo:%d\n",ArticuloA.Id_Articulo);
+    printf("\t Nombre:|%s|\n",ArticuloA.nombre);
+    printf("\t Marca:|%s|\n",ArticuloA.detalles.descripcion);
+    printf("\t Color:|%s|\n",ArticuloA.detalles.color);
+    printf("\t talle:|%d|\n",ArticuloA.detalles.talle);
+    printf("\t Cantidad:|%d|\n",ArticuloA.cantidad);
+    printf("\t Precio:|%.2f|\n",ArticuloA.precio);
+
+
+}
+//Muestro todos los articulos cargados en el arreglo
+void Mostrar_Articulos (Articulo Art[], int dim)
+{
+    printf ("\t - Lista de articulos [!] ");
+    printf("\n");
+    for(int i = 0; i < dim; i++)
+    {
+        printf("\n-------------------\n");
+        Mostrar_Articulo(Art[i]);
+        printf("-------------------\n");
+    }
+}
+//Busco articulos por el numero de articulo
+void Buscar_Articulo_Por_Id(Articulo Art[],int validos, int num)
+{
+    int i = 0;
+    while ( i < validos)
+
+    {
+
+        if (Art[i].Id_Articulo == num)
+        {
+            Mostrar_Articulo(Art[i]);
+        }
+        i++;
+    }
+}
+
+//Busco articulo por el nombre articulo
+int Buscar_Articulo_Por_Nombre(Articulo Art[],int limite, char nombre[])
+{
+    int i = 0;
+    int flag = -1;
+
+    while ( i < limite)
+    {
+
+        if (strcmp(Art[i].nombre,nombre) == 0)
+        {
+            Mostrar_Articulo(Art[i]);
+            flag=1;
+        }
+        i++;
+    }
+    return flag;
+}
+//Busco la posicion del arreglo donde se encuentra el nombre a buscar que paso por parametro ingresado desde el teclado
+int retornar_posicion_Articulo_Por_Nombre(Articulo Art[],int limite, char nombre[],int talle)
+{
+    int i = 0;
+    int pos = -1;
+
+    while ( i < limite)
+    {
+
+        if (strcmp(Art[i].nombre,nombre) == 0 && Art[i].detalles.talle == talle)
+        {
+            pos = i;
+        }
+        i++;
+    }
+    return pos;
+}
+
+//Ordena el contenido del arreglo por nombre
+void Ordenar_Articulos_Por_Nombre(Articulo art[],int validos)
+{
+    for (int i = 0; i < validos-1; i++)
+    {
+        insertar(art,i,art[i+1]);
+    }
+
+}
+int insertar (Articulo art[],int pos,Articulo datosig)
+{
+    int i = pos;
+
+    while (i >= 0 && strcmpi(art[i].nombre,datosig.nombre)>0 )
+    {
+        art[i+1] = art[i];
+        i--;
+    }
+    art[i+1] = datosig;
+}
+
+//-----PROVEEDORES--------------
+//Cargo un proveedor
+Proveedor Carga_de_Proveedor(int validos)
+{
+    Proveedor pro;
+
+    pro.Id_Proveedor = validos;
+
+
+    printf("Ingrese Nombre\n");
+    fflush(stdin);
+    gets (pro.informacion.nombre);
+    system("cls");
+
+    printf("Ingrese Direccion\n");
+    fflush(stdin);
+    gets (pro.informacion.Direccion);
+    system("cls");
+
+    printf("Ingrese Telefono\n");
+    fflush(stdin);
+    scanf("%d",&pro.informacion.Telefono);
+    system("cls");
+
+    printf("Ingrese CUIT\n");
+    fflush(stdin);
+    scanf("%d",&pro.informacion.CUIT);
+    system("cls");
+
+    printf("Ingrese Localidad\n");
+    fflush(stdin);
+    gets (pro.informacion.localidad);
+    system("cls");
+
+    return pro;
+}
+//Esta funcion carga el arreglo utilizando la funcion anterior y retorna la cantidad de registros cargados en el arreglo
+int Carga_muchos_Proveedores(Proveedor pro[],int validos,int lim)
+{
+
+    char rta='s';
+    int i=0;
+    Proveedor temporal;
+
+    while ((validos < lim ) && (rta=='s'))
+    {
+
+        temporal = Carga_de_Proveedor(validos);
+        pro[validos] = temporal;
+        validos++;
+        printf("Cargar otro Proveedor? S|N\n");
+        fflush(stdin);
+        scanf("%c",&rta);
+    }
+
+    return validos;
+
+}
+//Muestro un registro de Proveedroes
+void Mostrar_Proveedor (Proveedor proveedorA)
+{
+
+    printf("Numero de proveedor: %d\n",proveedorA.Id_Proveedor);
+    printf("CUIT: %d\n",proveedorA.informacion.CUIT);
+    printf("Nombre Comercial :%s\n",proveedorA.informacion.nombre);
+    printf("Direccion :%s\n ",proveedorA.informacion.Direccion);
+    printf("Telefono :%d\n",proveedorA.informacion.Telefono);
+    printf("Localidad:%s\n",proveedorA.informacion.localidad);
+
+
+}
+
+//Muestro todos los registros cargados en el arreglo utilizando la funcion anterior
+void Mostrar_todos_los_Proveedores (Proveedor pro[30], int dim)
+{
+    printf ("Lista de proveedores\n");
+
+    for(int i = 0; i < dim; i++)
+    {
+
+        Mostrar_Proveedor(pro[i]);
+    }
+}
+
+//-----VENTAS------
+int Ingresar_Venta(Articulo Art[],ventas ven[],int limite,int validos)
+{
+    int cant = 0;
+    float precio = 0;
+    char nombre[50];
+    int posicion = 0;
+    int i = 0;
+    char rta = 's';
+    int talle;
+    int flag = 0;
+
+    while (rta=='s' && validos < limite)
+    {
+        do
+        {
+            printf("\tIngrese Nombre del Articulo :");
+            fflush(stdin);
+            gets(&nombre);
+            flag = Buscar_Articulo_Por_Nombre(Art,200,nombre);
+            if (flag ==-1)
+            {
+                printf("\tNo existe el Articulo!\n");
+            }
+        }
+        while(flag==-1);
+        printf("\n");
+
+        do
+
+        {
+            printf("\tIngrese talle :");
+            fflush(stdin);
+            scanf("%d",&talle);
+            posicion = retornar_posicion_Articulo_Por_Nombre(Art,200,nombre,talle);
+            if(posicion == -1)
+            {
+                printf("\tTalle Incorrecto\n");
+                printf("\tIngrese talle nuevamente\n");
+                system("pause");
+            }
+        }
+        while(posicion == -1);
+
+        printf("\n\n");
+
+        do
+        {
+            printf("\tIngrese Cantidad:");
+            fflush(stdin);
+            scanf("%d",&cant);
+            if (cant > Art[posicion].cantidad)
+            {
+                printf("\t[La cantidad ingresada supera el stock actual][!]\n");
+                printf("\n");
+                printf("\t[Ingrese una cantidad inferior]\n");
+            }
+            system("pause");
+            system("cls");
+        }
+        while (cant > Art[posicion].cantidad);
+
+        precio = Precio_Final_venta(cant,Art,posicion);
+        printf("Precio Final %0.2f:",precio);
+        if (Art[posicion].cantidad > 0 )
+        {
+
+
+            Art[posicion].cantidad = Art[posicion].cantidad  - cant;
+            ven[validos].id_venta = validos;
+            ven[validos].cantidad = cant;
+            ven[validos].monto = precio;
+            ven[validos].id_producto=Art[posicion].Id_Articulo;
+            ven[validos].total = ven[validos -1].total + precio;
+            validos++;
+
+        }
+        else
+        {
+            printf("\t[Producto sin Stock][!]\n");
+        }
+
+        Pasar_arreglo_de_ventas_archivo(ven,validos);
+        printf("\n");
+        printf("\tDesea ingresar otra venta ?\n");
+        fflush(stdin);
+        scanf("\t%c",&rta);
+
+    }
+
+    return validos;
+
+}
+float Precio_Final_venta(int cant,Articulo Art[],int posicion)
+{
+    float precio = 0;
+
+    precio = Art[posicion].precio * cant;
+
+    return precio;
+
+}
+
+
+void Pasar_arreglo_de_articulos_archivo(Articulo a[],int validos)
+{
+    FILE *archi;
+    archi = fopen(Archivo_articulos,"wb");
+    Articulo art;
+
+    if(archi!=NULL)
+    {
+        for (int i= 0; i < validos; i++)
+        {
+            art = a[i];
+            fwrite(&art,sizeof(art),1,archi);
+        }
+        fclose(archi);
+    }
+    else
+    {
+        printf("El archivo no existe\n");
+    }
+
+}
+
+void Mostrar_Archivos_Articulos()
+{
+    FILE * archi;
+    archi = fopen(Archivo_articulos,"rb");
+    Articulo Unart;
+    int cantidad_de_articulos = 0;
+
+    if (archi!=NULL)
+    {
+        printf("-------------------------------------\n");
+        printf("Articulos Encontrados en el archivo : \n");
+
+        while(fread(&Unart,sizeof(Articulo),1,archi)>0)
+        {
+            printf("----------------------------------\n");
+            Unart = Mostrar_Archivos_de_articulos(Unart);
+            printf("----------------------------------");
+        }
+
+        fclose(archi);
+    }
+    else
+
+    {
+        printf("El archivo no existe.....\n");
+    }
+
+}
+
+Articulo Mostrar_Archivos_de_articulos (Articulo art)
+{
+    fecha_y_hora(art.fechayhora);
+    printf("\n");
+    printf("Numero de Identificacion: %d\n",art.Id_Articulo);
+    printf("Nombre del articulo : %s\n",art.nombre);
+    printf("Descripcion : %s\n",art.detalles.descripcion);
+    printf("talle:%d\n",art.detalles.talle);
+    printf("color:%s\n",art.detalles.color);
+    printf("Cantidad:%d\n",art.cantidad);
+    printf("Precio : %.2f\n",art.precio);
+    printf("\n");
+
+}
+//funcion para crear un archivo aun no implementada
+void CrearArchivo(char nombre [],ventas ven[],int validos)
+{
+    FILE * archi;
+    archi = fopen (strcat( nombre,".dat"),"wb");  //concateno al nombre del archivo con
+
+    if (archi!=NULL)
+    {
+        //Pasar_arreglo_ventas_archivo(ven,validos,nombre);
+
+    }
+    else
+    {
+        printf("Error");
+    }
+    fclose(archi);
+}
+
+//Muestro un usuario
+void Mostrar_un_Usuario (Usuarios Unusuario)
+{
+    printf("*************************\n");
+    printf("Numero de Usuario:  %d\n",Unusuario.Id_Usuario);
+    printf("User: %s\n",Unusuario.user);
+    printf("Pass: %s\n",Unusuario.pass);
+    printf("*************************\n");
+
+}
+//Paso del arreglo al archivo los usuarios cargados en el arreglo
+void Pasar_arreglo_de_usuarios_archivo(Usuarios a[],int validos)
+{
+    FILE *archi;
+    archi = fopen(Archivo_usuarios,"wb"); // Apertura en wb por el modo en que se cargan los arreglos y no se carguen repetidos.
+    Usuarios usr;
+
+    if(archi!=NULL)
+    {
+        for (int i= 0; i < validos; i++)
+        {
+
+            usr = a[i];
+            fwrite(&usr,sizeof(usr),1,archi);
+        }
+        fclose(archi);
+    }
+    else
+    {
+        printf("El archivo no existe\n");
+    }
+
+}
+//Muestro el archivo de usuarios
+
+void Mostrar_Archivos_Usuarios()
+{
+    FILE * archi;
+    archi = fopen(Archivo_usuarios,"rb");
+    Usuarios user;
+    int cantidad_de_usuarios = 0;
+
+    if (archi!=NULL)
+    {
+        printf("Usuarios Encontrados en el archivo : \n");
+
+        while(fread(&user,sizeof(Usuarios),1,archi)>0)
+        {
+            Mostrar_un_Usuario(user);
+        }
+
+        fclose(archi);
+    }
+    else
+
+    {
+        printf("El archivo no existe.....\n");
+    }
+
+}
+
+
+//Muestro una venta
+void Mostrar_ventas (ventas unaventa)
+{
+
+    printf("Numero de venta:%d\n",unaventa.id_venta);
+    printf("Numero de producto:%d\n",unaventa.id_producto);
+    printf("Cantidad:%d\n",unaventa.cantidad);
+    printf("monto:%.2f\n",unaventa.monto);
+    printf("\n");
+    printf("Monto Total de ventas diarias:%.2f\n",unaventa.total);
+}
+//Muestro todos las ventas recorriendo el arreglo
+void Mostrar_Todas_las_ventas (ventas venta[], int validos)
+{
+    printf (" ventas Cargadas ");
+    printf("\n");
+    for(int i = 0; i < validos; i++)
+    {
+        printf ("------------\n ");
+        Mostrar_ventas(venta[i]);
+        printf ("------------");
+    }
+
+}
+
+void Pasar_arreglo_de_ventas_archivo(ventas a[],int validos)
+{
+    FILE *archi;
+    archi = fopen(Archivo_ventas,"wb"); // Apertura en wb por el modo en que se cargan los arreglos y no se carguen repetidos.
+    ventas unaventa;
+
+    if(archi!=NULL)
+    {
+        for (int i= 0; i < validos; i++)
+        {
+
+            unaventa = a[i];
+            fwrite(&unaventa,sizeof(unaventa),1,archi);
+        }
+        fclose(archi);
+    }
+    else
+    {
+        printf("El archivo no existe\n");
+    }
+
+}
+
+Articulo Mostrar_una_venta (ventas ven)
+{
+    printf("\n");
+    printf("Numero de venta: %d\n",ven.id_venta);
+    printf("Numero de producto : %d\n",ven.id_producto);
+    printf("cantidad : %d\n",ven.cantidad);
+    printf("Monto:%.2f\n",ven.monto);
+
+}
+
+//Muestro el archivo Ventas
+void Mostrar_Archivo_ventas()
+{
+    FILE * archi;
+    archi = fopen(Archivo_ventas,"rb");
+    ventas unaventa;
+    int cantidad_de_usuarios = 0;
+
+    if (archi!=NULL)
+    {
+        printf("Ventas Encontrados en el archivo : \n");
+
+        while(fread(&unaventa,sizeof(ventas),1,archi)>0)
+        {
+            Mostrar_una_venta(unaventa);
+        }
+
+        fclose(archi);
+    }
+    else
+
+    {
+        printf("El archivo no existe.....\n");
+    }
+
+}
+void PasardelArchivoAlArreglo(Articulo a[],int limite)
+{
+    FILE * archi;
+    archi = fopen(Archivo_articulos,"rb");
+
+    Articulo unarticulo;
+
+    int i = 0;
+    int cantidad_art = 0;
+
+    if (archi!=NULL)
+    {
+        while (fread(&unarticulo,sizeof(Articulo),1,archi)> 0 && ( i < limite))
+        {
+            a[i]=unarticulo;
+            i++;
+        }
+        fclose(archi);
+    }
+    else
+    {
+        printf("El aechivo no existe!\n");
+    }
+
+}
+
+
+int abrir_caja(caja c[],int limite)
+{
+    int i = 0;
+    if(i<limite)
+    {
+        printf("Ingrese monto inicial : ");
+        fflush(stdin);
+        scanf("%f",&c[i].apertura_caja);
+        printf("\n");
+        printf("Ingreso exitoso!");
+        system("cls");
+        i++;
+    }
+    return i;
+}
+
+void cerrar_caja(caja c[],ventas ven[],int validos)
+{
+    int i = 0;
+    printf("CIERRE DE CAJA\n");
+    printf("\n\n");
+    printf("SALDO TOTAL DE VENTAS :|%.2f | ",ven[validos-1].total);
+    printf("SALDO FINAL :|%.2f |",c[i].apertura_caja + ven[validos-1].total);
+}
+
+//DISEÑO
+
+void gotoxy(int x,int y)
+{
+    HANDLE hcon;
+    hcon = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD dwPos;
+    dwPos.X = x;
+    dwPos.Y= y;
+    SetConsoleCursorPosition(hcon,dwPos);
+}
+
+void dibujarCuadro(int x1,int y1,int x2,int y2)
+{
+    int i;
+
+    for (i=x1; i<x2; i++)
+    {
+        gotoxy(i,y1);
+        printf("\304"); //linea horizontal superior
+        gotoxy(i,y2);
+        printf("\304"); //linea horizontal inferior
+    }
+
+    for (i=y1; i<y2; i++)
+    {
+        gotoxy(x1,i);
+        printf("\263"); //linea vertical izquierda
+        gotoxy(x2,i);
+        printf("\263"); //linea vertical derecha
+    }
+
+    gotoxy(x1,y1);
+    printf("\332");
+    gotoxy(x1,y2);
+    printf("\300");
+    gotoxy(x2,y1);
+    printf("\277");
+    gotoxy(x2,y2);
+    printf("\331");
+}
+
+void ordenSelec(Articulo Art[],int validos)
+{
+    int posMenor=0;
+
+    for(int i = 0 ; i < validos ; i++)
+    {
+        for(int j = i+1 ; j < validos; j++)
+        {
+            if(Art[j].Id_Articulo <Art[i].Id_Articulo)
+            {
+                posMenor=Art[j].Id_Articulo;
+                Art[j].Id_Articulo=Art[i].Id_Articulo;
+                Art[i].Id_Articulo=posMenor;
+            }
+        }
+    }
+}
